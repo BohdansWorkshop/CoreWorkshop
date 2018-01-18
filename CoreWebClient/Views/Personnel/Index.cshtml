@@ -1,0 +1,72 @@
+﻿@model List<ModelsAndInterfaces.Classes.Person>
+@{
+    ViewBag.Title = "Archive";
+}
+@using ModelsAndInterfaces.Classes
+@using Newtonsoft.Json
+
+<script type="text/javascript" src="~/Scripts/knockout-3.4.2.js"></script>
+<script type="text/javascript" src="~/Scripts/knockout.mapping-latest.js"></script>
+<style>
+
+    </style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var persons = @Html.Raw(JsonConvert.SerializeObject(Model));
+        personInfoViewModel = new PersonInfoViewModel(persons);
+        ko.applyBindings(personInfoViewModel);
+    });
+    function PersonInfoViewModel(persons) {
+        var _this = this;
+
+        _this.personsInfo = ko.mapping.fromJS(persons);
+        _this.ShowDetails = function (item) {
+            var userId = item.Id();
+            $.ajax({
+                type: "POST",
+                url:"@Url.Action("Details", "Personnel")",
+                data: {'personId' : userId},
+                success: function (response) {
+                    $('#dialog').html(response);
+                }
+            });
+        }
+    }
+
+
+</script>
+
+
+
+<h2 align="center">Our Persons</h2>
+<div class="container">
+    <table class="table">
+        <thead class="thead-inverse">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Age</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+        </thead>
+        <!-- ko foreach: personsInfo()-->
+        <tbody class="table">
+        <tr>
+            <td data-bind="text: Id"></td>
+            <td data-bind="text: Name"></td>
+            <td data-bind="text: Surname"></td>
+            <td data-bind="text: Age"></td>
+            <td data-bind="text: Status"> </td>
+            <td><span id="Details" class="glyphicon glyphicon-eye-open" data-bind="click: $root.ShowDetails"></span></td>
+            <td><span class="glyphicon glyphicon-edit"></span></td>
+            <td><span class="glyphicon glyphicon-fire"></span></td>
+        </tr>
+        </tbody>
+        <!-- /ko -->
+    </table>
+</div>
+
+<pioneer-pagination info="@ViewBag.PaginatedMeta" route="/blog" previous-page-text="hey" next-page-text="you"></pioneer-pagination>
+
